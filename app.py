@@ -25,7 +25,8 @@ def get_vectorstore_from_url(url):
     document_chunks = text_splitter.split_documents(document)
     
     # create a vectorstore from the chunks
-    vector_store = Chroma.from_documents(document_chunks, OpenAIEmbeddings())
+    #vector_store = Chroma.from_documents(document_chunks, OpenAIEmbeddings())
+    vector_store = FAISS.from_documents(document_chunks, OpenAIEmbeddings())
 
     return vector_store
 
@@ -75,23 +76,23 @@ st.title("Chat with websites")
 
 # sidebar
 with st.sidebar:
-    st.header("Settings")
-    website_url = st.text_input("Website URL")
+    st.header("設定")
+    website_url = st.text_input("ウェブサイト URL")
 
 if website_url is None or website_url == "":
-    st.info("Please enter a website URL")
+    st.info("ウェブサイトの URL を入力してください")
 
 else:
     # session state
     if "chat_history" not in st.session_state:
         st.session_state.chat_history = [
-            AIMessage(content="Hello, I am a bot. How can I help you?"),
+            AIMessage(content="こんにちは、ボットです。どんな御用でしょうか？"),
         ]
     if "vector_store" not in st.session_state:
         st.session_state.vector_store = get_vectorstore_from_url(website_url)    
 
     # user input
-    user_query = st.chat_input("Type your message here...")
+    user_query = st.chat_input("ここにメッセージを入力してください...")
     if user_query is not None and user_query != "":
         response = get_response(user_query)
         st.session_state.chat_history.append(HumanMessage(content=user_query))
@@ -105,5 +106,5 @@ else:
             with st.chat_message("AI"):
                 st.write(message.content)
         elif isinstance(message, HumanMessage):
-            with st.chat_message("Human"):
+            with st.chat_message("人間"):
                 st.write(message.content)
